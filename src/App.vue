@@ -23,9 +23,7 @@
                 <router-link :to="{ name: 'login'}" tag="li" exact active-class="active">
                   <a>Sign In</a>
                 </router-link>
-
-
-
+                
                 <router-link v-if="auth" :to="{ name: 'viewProfile' }">My Profile</router-link>
               </ul>
             </div>
@@ -45,12 +43,30 @@
 
 <script>
   import { eventBus } from './main';
+  import { fbService } from './main';
 
   export default {
     data() {
       return {
-        auth: false
+        auth: false,
+        user: { 
+          Nickname: '',
+          Email: ''
+        }
       };
+    },
+    computed: {
+      getUser() {
+        let user = fbService.auth().currentUser
+        user == null ? console.log("need log in") : console.log("logined");
+      }
+    },
+    created() {
+      eventBus.$on('loggedIn', (loggedIn) => {
+        this.auth = true;
+        this.getUser;
+        console.log("bip-bip");
+      })
     }
   }
 </script>

@@ -22,14 +22,15 @@
 </template>
 
 <script>
-  import { fbService } from './main'
-
+  import { fbService } from './main';
+  import { eventBus } from './main';
 
   export default {
   data(){
     return {
       email: '',
       password: '',
+      loggedIn: false,
       submitted: false,
       status: {
         loggingIn: false,
@@ -43,7 +44,12 @@
       let vueObj = this;
       this.submitted = true;
       this.status.loggingIn = true;
-      fbService.auth().signInWithEmailAndPassword(this.email, this.password).catch(function(error) {
+      fbService.auth().signInWithEmailAndPassword(this.email, this.password).then(function(user) {
+        console.log(user);
+        vueObj.loggedIn = true
+        eventBus.$emit('loggedIn', vueObj.loggedIn);
+        vueObj.$router.push('/');      
+      }).catch(function(error) {
         let errorCode = error.code;
         let errorMessage = error.message;
         console.log(errorMessage);
@@ -56,7 +62,3 @@
   }
 }
 </script>
-
-<style scoped>
-
-</style>
