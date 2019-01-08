@@ -5,6 +5,7 @@
 </template>
 
 <script>
+  import { fbService } from './main';
 
 	class gameObj {
 		constructor(type, x, y) {
@@ -27,32 +28,40 @@
   			game: null,
   			lvl: 1,
   			gameSpeed: null,
-  			heroSpeed: 10,
+  			heroSpeed: 7,
   			gameScore: 0,
-  			objList: [
-  				tempHero,
-  				new gameObj(1, Math.random() * 450 , 0),
-  				new gameObj(1, Math.random() * 450 , -100),
-  				new gameObj(1, Math.random() * 450 , -200),
-  				new gameObj(1, Math.random() * 450 , -300),
-  				new gameObj(1, Math.random() * 450 , -400),
-  				new gameObj(1, Math.random() * 450 , -500),
-  				new gameObj(1, Math.random() * 450 , -600),
-  				new gameObj(1, Math.random() * 450 , -700),
-  			],
+  			objList: [],
+        gameLoop: null,
   			hero: null
   		}
   	},
   	methods: {
   		startGame: function() {
   			let vueObj = this
+        this.objList = [
+          tempHero,
+          new gameObj(1, Math.random() * 450 , 0),
+          new gameObj(1, Math.random() * 450 , -100),
+          new gameObj(1, Math.random() * 450 , -200),
+          new gameObj(1, Math.random() * 450 , -300),
+          new gameObj(1, Math.random() * 450 , -400),
+          new gameObj(1, Math.random() * 450 , -500),
+          new gameObj(1, Math.random() * 450 , -600),
+          new gameObj(1, Math.random() * 450 , -700),]
+        this.hero = this.objList[0];  
+        this.gameScore = 0;
+        this.lvl = 1;
+        this.gameSpeed = this.lvl * 2; 
+
   			this.game.fillStyle = "#FF0000";
   			this.game.fillRect(0, 0, 500, 500);
   			this.gameSpeed = this.lvl * 2;
   			console.log("drawing");
-  			let gameLoop = setInterval(function() {
+  			this.gameLoop = setInterval(function() {
   				vueObj.game.drawImage(bg, 0, 0, 500, 500)
-
+          let scoreString = "Score: " + Math.ceil(vueObj.gameScore);
+          vueObj.game.font = "30px Arial"
+          vueObj.game.fillText(scoreString, 50, 50)
   				vueObj.objList.forEach((obj) => {
   					if (obj.type == 1){
   						obj.y += vueObj.gameSpeed;
@@ -64,7 +73,6 @@
   				})
 
   				vueObj.objList.forEach((obj) => {
-  					// obj.type == 0 ? vueObj.game.fillStyle = "green" : vueObj.game.fillStyle = "blue";
   					vueObj.game.drawImage(obj.image, obj.x, obj.y, 50, 100);
   				})
 
@@ -74,7 +82,7 @@
                   obj.y > vueObj.hero.y && obj.y < vueObj.hero.y + 80) {
                 if(obj.x + 30 > vueObj.hero.x && obj.x + 30 < vueObj.hero.x + 30 ||
                   obj.x > vueObj.hero.x && obj.x < vueObj.hero.x + 30){
-                  alert("sosat'")
+                  vueObj.endGame();
                 }
               }
             }
@@ -84,8 +92,27 @@
   				vueObj.lvl = (vueObj.gameScore / 3000) + 1;
   				vueObj.gameSpeed = vueObj.lvl * 2;
   			}, 1000 / 60)
-
   		},
+      endGame: function() {
+        let user = this.getUser();
+
+        let data = {
+          id: user.uid,
+          nickname: user.displayName,
+          score: Math.ceil(this.gameScore)
+        }
+
+        fbService.database().ref('leaderboard').push(data);
+        let isNewGame = confirm("Do you wanna play again?")
+        if(isNewGame) {
+          clearInterval(this.gameLoop);
+          this.startGame();          
+        }
+        else {
+          clearInterval(this.gameLoop);
+          this.$router.push('/leaderboard');   
+        }
+      },
   		heroLeft: function() {
   			if (this.hero.x > 0)
   				this.hero.x -= this.heroSpeed;
@@ -93,7 +120,10 @@
   		heroRight: function() {
   			if (this.hero.x < 450)
   				this.hero.x += this.heroSpeed;
-  		}
+  		},
+      getUser: function() {
+        return fbService.auth().currentUser;
+      }
   	},
   	mounted() {
   		this.canvas = document.getElementById("canvas");

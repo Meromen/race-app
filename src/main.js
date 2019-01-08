@@ -21,10 +21,6 @@ export const eventBus = new Vue();
 
 Vue.use(VueRouter);
 Vue.use(VeeValidate);
-// Vue.config.keyCodes.leftArrow = 37;
-// Vue.config.keyCodes.upArrow = 38;
-// Vue.config.keyCodes.rightArrow = 39;
-// Vue.config.keyCodes.downArrow = 40;
 
 const router = new VueRouter({
   routes: routes,

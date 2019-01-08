@@ -20,11 +20,17 @@
 
             <div class="nav navbar-nav navbar-right">
               <ul class="nav navbar-nav">
-                <router-link :to="{ name: 'login'}" tag="li" exact active-class="active">
+                <router-link v-if="!auth" :to="{ name: 'login'}" tag="li" exact active-class="active">
                   <a>Sign In</a>
                 </router-link>
                 
-                <router-link v-if="auth" :to="{ name: 'viewProfile' }">My Profile</router-link>
+                <li>
+                  <a v-if="auth" class="btn" @click="singOut()">Sign Out</a>                  
+                </li>
+
+                <router-link v-if="auth" :to="{ name: 'viewProfile' }" tag="li" exact active-class="active">
+                  <a>My Profile</a>
+                </router-link>
               </ul>
             </div>
           </div>
@@ -54,6 +60,16 @@
           Email: ''
         }
       };
+    },
+    methods: {
+      singOut: function() {
+        let vueObj = this
+        fbService.auth().signOut().then(function() {
+          vueObj.auth = false;
+        }).catch(function(error) {
+          console.log("sign out error")
+        });
+      }
     },
     computed: {
       getUser() {
