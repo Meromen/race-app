@@ -28,6 +28,7 @@
 
 <script>
 import { fbService } from './main';
+import { routes } from './routes';
 
 export default {
   data () {
@@ -53,12 +54,18 @@ export default {
           displayName: vueObj.user.nickname
         }).then(function() {
           console.log("update suc");
+          vueObj.$router.push('/login');   
         }).catch(function(error) {
           console.log(error);
+          vueObj.submitted = false;
+          vueObj.status.registering = false;
         });
       }).catch(function(error) {    
         var errorCode = error.code;
         var errorMessage = error.message;
+        console.log(errorMessage)
+        vueObj.submitted = false;
+        vueObj.status.registering = false;
       })
     }
   }
