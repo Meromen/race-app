@@ -22,6 +22,11 @@
   bg.src = "src/assets/road.png";
 
   export default {
+		props: {
+			auth: {
+				required: true
+			}
+		},
   	data() {
   		return {
   			canvas: null,
@@ -102,7 +107,7 @@
           score: Math.ceil(this.gameScore)
         }
 
-        fbService.database().ref('leaderboard').push(data);
+        fbService.database().ref().child('leaderboard').push(data);
         let isNewGame = confirm("Do you wanna play again?")
         if(isNewGame) {
           clearInterval(this.gameLoop);
@@ -125,22 +130,30 @@
         return fbService.auth().currentUser;
       }
   	},
-  	mounted() {
-  		this.canvas = document.getElementById("canvas");
-  		console.log(this.canvas);
-  		this.game = this.canvas.getContext("2d");
-  		this.hero = this.objList[0];
-  		let vueObj = this;
-  		window.addEventListener("keydown", function(event) {
-  			if (event.keyCode === 37) {
-  				vueObj.heroLeft()
-  			}
+  	mounted() {		
+			if (this.auth) {
+				this.canvas = document.getElementById("canvas");
+				console.log(this.canvas);
+				this.game = this.canvas.getContext("2d");
+				this.hero = this.objList[0];
+				let vueObj = this;
+				window.addEventListener("keydown", function(event) {
+					if (event.keyCode === 37) {
+						vueObj.heroLeft()
+					}
 
-  			if (event.keyCode === 39) {
-  				vueObj.heroRight()
-  			}
-  		}, true);
-  		this.startGame();
-  	}
+					if (event.keyCode === 39) {
+						vueObj.heroRight()
+					}
+				}, true);
+				this.startGame();	
+			}	else {
+				this.$router.push('/login');   
+			}
+  		
+		},
+		destroyed() {
+			clearInterval(this.gameLoop);
+		}
   }
 </script>

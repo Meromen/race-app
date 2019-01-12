@@ -41,7 +41,7 @@
         enter-active-class="animated fadeInRight"
         leave-active-class="animated fadeOutLeft"
         mode="out-in">
-        <router-view></router-view>
+        <router-view :auth="auth"></router-view>
       </transition>
     </div>
   </div>
@@ -69,6 +69,7 @@
         }).catch(function(error) {
           console.log("sign out error")
         });
+        this.$router.push('/login');   
       }
     },
     computed: {
