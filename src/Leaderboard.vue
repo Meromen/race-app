@@ -30,7 +30,7 @@
     mounted() {
       console.log("mounted")
       let vueObj = this;
-      fbService.database().ref("leaderboard").orderByChild("score").limitToLast(20).on("child_added", function(data) {
+      fbService.database().ref("leaderboard").orderByChild("score").limitToLast(15).on("child_added", function(data) {
         vueObj.leaderboard.unshift(data.val())
       })
     }    

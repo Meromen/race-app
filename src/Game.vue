@@ -13,7 +13,21 @@
 			this.x = x;
 			this.y = y;
 			this.image = new Image(50, 100);
-			this.type == 0 ? this.image.src = "src/assets/car.png" :  this.image.src = "src/assets/logo.png";
+      if (this.type == 0) {
+        this.image.src = "src/assets/car.png";        
+      } else 
+      if (this.type == 1) {
+        this.image.src = "src/assets/logo.png";        
+      } else
+      if (this.type == 2) {
+        this.image.src = "src/assets/bonus.png"
+      }
+
+      this.bonusStatus = {
+        bonusType: 0,
+        bonusActive: false,
+        bonusTimer: 0
+      }
 		}
 	}
 
@@ -33,7 +47,7 @@
   			game: null,
   			lvl: 1,
   			gameSpeed: null,
-  			heroSpeed: 7,
+  			heroSpeed: 20,
   			gameScore: 0,
   			objList: [],
         gameLoop: null,
@@ -52,50 +66,99 @@
           new gameObj(1, Math.random() * 450 , -400),
           new gameObj(1, Math.random() * 450 , -500),
           new gameObj(1, Math.random() * 450 , -600),
-          new gameObj(1, Math.random() * 450 , -700),]
-        this.hero = this.objList[0];  
+          new gameObj(1, Math.random() * 450 , -700),
+          new gameObj(2, Math.random() * 450 , -1500),          
+          ]
+        this.hero = this.objList[0];   
         this.gameScore = 0;
         this.lvl = 1;
         this.gameSpeed = this.lvl * 2; 
 
   			this.game.fillStyle = "#FF0000";
   			this.game.fillRect(0, 0, 500, 500);
-  			this.gameSpeed = this.lvl * 2;
+  			this.gameSpeed = this.lvl * 1.54;
   			console.log("drawing");
   			this.gameLoop = setInterval(function() {
   				vueObj.game.drawImage(bg, 0, 0, 500, 500)
-          let scoreString = "Score: " + Math.ceil(vueObj.gameScore);
-          vueObj.game.font = "30px Arial"
-          vueObj.game.fillText(scoreString, 50, 50)
   				vueObj.objList.forEach((obj) => {
-  					if (obj.type == 1){
+  					if (obj.type == 1) {
   						obj.y += vueObj.gameSpeed;
-  						if(obj.y > 500){
+  						if(obj.y > 500) {
   							obj.y = -300;
   							obj.x = Math.random() * 450;
   						}
-  					}  					
+  					} else 
+            if (obj.type == 2) {
+              obj.y += vueObj.gameSpeed;
+              if(obj.y > 500) {
+                obj.y = -3000;
+                obj.x = Math.random() * 450;
+              }
+            }
   				})
 
   				vueObj.objList.forEach((obj) => {
   					vueObj.game.drawImage(obj.image, obj.x, obj.y, 50, 100);
   				})
 
-          vueObj.objList.forEach((obj) => {
-            if (obj.type === 1) {
-              if (obj.y + 80 > vueObj.hero.y && obj.y + 80 < vueObj.hero.y + 80 ||
-                  obj.y > vueObj.hero.y && obj.y < vueObj.hero.y + 80) {
-                if(obj.x + 30 > vueObj.hero.x && obj.x + 30 < vueObj.hero.x + 30 ||
-                  obj.x > vueObj.hero.x && obj.x < vueObj.hero.x + 30){
-                  vueObj.endGame();
+          if (vueObj.hero.bonusStatus.bonusActive){
+            vueObj.game.beginPath();
+            vueObj.game.arc(vueObj.hero.x + 25, vueObj.hero.y + 50, 52, 0, 2 * Math.PI);
+            vueObj.game.strokeStyle = "blue";
+            vueObj.game.stroke();
+            vueObj.game.fillStyle = "rgba(92, 117, 206, 0.4)";
+            vueObj.game.fill();
+          }
+
+
+          let scoreString = "Score: " + Math.ceil(vueObj.gameScore);
+          let lvlString = "Level: " + Math.floor(vueObj.lvl);
+          vueObj.game.fillStyle = "#FF0000";
+          vueObj.game.font = "30px Arial";
+          vueObj.game.fillText(scoreString, 50, 50)
+          vueObj.game.fillText(lvlString, 50, 100)
+
+          vueObj.objList.forEach((obj) => {            
+            if (obj.y + 80 > vueObj.hero.y && obj.y + 80 < vueObj.hero.y + 80 ||
+                obj.y > vueObj.hero.y && obj.y < vueObj.hero.y + 80) {
+              if (obj.x + 30 > vueObj.hero.x && obj.x + 30 < vueObj.hero.x + 30 ||
+                obj.x > vueObj.hero.x && obj.x < vueObj.hero.x + 30){
+                if (obj.type === 1) {   
+                  if (vueObj.hero.bonusStatus.bonusActive) {
+                    vueObj.hero.bonusStatus.bonusActive = false;
+                    vueObj.hero.bonusStatus.bonusTimer = 0;
+                    obj.x = Math.random() * 450;
+                    obj.y = -300 - (500 - obj.y);
+                  } else {
+                    vueObj.endGame();                    
+                  }
+                }
+
+                if (obj.type === 2) {
+                  vueObj.hero.bonusStatus.bonusActive = true;
+                  vueObj.hero.bonusStatus.bonusTimer = 10000;
+                  vueObj.hero.bonusStatus.bonusType = obj.bonusStatus.bonusType;
+                  obj.x = Math.random() * 450;
+                  obj.y = -3000 - (500 - obj.y);
                 }
               }
             }
           })
 
+          if (vueObj.hero.bonusStatus.bonusActive) {
+            if (vueObj.hero.bonusStatus.bonusTimer <= 1) {
+              vueObj.hero.bonusStatus.bonusActive = false;
+            }
+            vueObj.hero.bonusStatus.bonusTimer -= (1000 / 60)
+            let tiemerString = "Bonus: " + Math.floor(vueObj.hero.bonusStatus.bonusTimer / 1000) + "s"
+            vueObj.game.fillStyle = "#FF0000";
+            vueObj.game.font = "30px Arial";
+            vueObj.game.fillText(tiemerString, 350, 50)
+          }
+
   				vueObj.gameScore += vueObj.gameSpeed;
   				vueObj.lvl = (vueObj.gameScore / 3000) + 1;
-  				vueObj.gameSpeed = vueObj.lvl * 2;
+  				vueObj.gameSpeed = vueObj.lvl * 1.54;
   			}, 1000 / 60)
   		},
       endGame: function() {
