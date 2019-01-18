@@ -1,6 +1,14 @@
 <template>
   <div>
     <h2>Login</h2>
+    <transition
+        enter-active-class="animated fadeInRight"
+        leave-active-class="animated fadeOutLeft"
+        mode="out-in">
+      <div v-if="status.error" class="alert alert-warning fade in">
+        {{ status.errorMessage }} 
+      </div>
+    </transition>  
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label for="email">Email</label>
@@ -56,6 +64,7 @@
 
         vueObj.submitted = false;
         vueObj.status.loggingIn = false;
+        vueObj.status.error = true;
         vueObj.status.errorMessage = errorMessage;
       })
     }

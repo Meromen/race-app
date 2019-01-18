@@ -4,7 +4,7 @@
       <nav class="navbar navbar-default">
         <div class="container-fluid">
           <div class="navbar-header">
-            <router-link to="/" exact class="navbar-brand"><strong>E-commerce Inc.</strong></router-link>
+            <router-link to="/" exact class="navbar-brand"><strong>Limbus</strong></router-link>
           </div>
 
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">

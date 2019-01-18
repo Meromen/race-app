@@ -1,6 +1,8 @@
 <template>
   <div class="container">
-    <canvas tabindex="1" id="canvas" width="500" height="500"></canvas>
+    <div class="center-block">
+      <canvas tabindex="1" id="canvas" width="500" height="500"></canvas>      
+    </div>
   </div>
 </template>
 
@@ -58,7 +60,8 @@
             main: true,
             credits: false
           },
-          gameMod: false
+          gameMod: false,
+          pauseMod: false
         },
         menuImg: {
           backGround: null,
@@ -82,19 +85,23 @@
           }
 
           if (vueObj.gameState.gameMod) {
-            vueObj.checkKyes();
-          
-            vueObj.moveObjects();
+            if (!vueObj.gameState.pauseMod) {
+              vueObj.checkKyes();
             
-            vueObj.drawScene();
+              vueObj.moveObjects();
+              
+              vueObj.drawScene();
 
-            vueObj.checkBonuses();
+              vueObj.checkBonuses();
 
-            vueObj.findCollision();
+              vueObj.findCollision();
 
-            vueObj.drawInfo();
+              vueObj.drawInfo();
 
-            vueObj.updateStats();          
+              vueObj.updateStats();          
+            } else {
+              vueObj.drawPause();
+            }  
           }                    
   			}, 1000 / 60)
       },
@@ -110,7 +117,7 @@
 
         this.menuImg.backGround = new Image();
 
-        this.menuImg.backGround.src = "src/assets/background.jpg";
+        this.menuImg.backGround.src = "src/assets/backGround.jpg";
 
         this.menuImg.newGameBut.src =  "src/assets/ngb.png";
         this.menuImg.newGameBut.x1 = 156;
@@ -126,10 +133,10 @@
         this.menuImg.creditsBut.y2 = 350;
         this.menuImg.creditsBut.CBSelected = false;
 
-        this.menuImg.credits.src = "src/assets/credits.png";
-        this.menuImg.credits.x1 = 0;
+        this.menuImg.credits.src = "src/assets/Credits.png";
+        this.menuImg.credits.x1 = -6;
         this.menuImg.credits.x2 = 512;
-        this.menuImg.credits.y1 = 0;
+        this.menuImg.credits.y1 = -6;
         this.menuImg.credits.y2 = 512;
 
         this.menuImg.backBut.src = "src/assets/bb.png";
@@ -266,6 +273,14 @@
         })
       },
 
+      drawPause: function() {
+        this.game.fillStyle = "rgb(0, 0, 0)"
+        this.game.fillRect(0, 0, 500, 500)
+        this.game.fillStyle = "#FF0000";
+        this.game.font = "30px Arial";
+        this.game.fillText("PAUSE", 200, 250)
+      },
+
       drawInfo: function() {
         let scoreString = "Score: " + Math.ceil(this.gameScore);
         let lvlString = "Level: " + Math.floor(this.lvl);
@@ -319,11 +334,17 @@
 
       endGame: function() {
         let user = this.getUser();
+        let vueObj = this;
 
         let data = {
           id: user.uid,
           nickname: user.displayName,
           score: Math.ceil(this.gameScore)
+        }
+        if (!user.photoURL || +user.photoURL < this.gameScore){
+          user.updateProfile({
+            photoURL: String(vueObj.gameScore)
+          })          
         }
 
         fbService.database().ref().child('leaderboard').push(data);
@@ -420,12 +441,23 @@
 				this.hero = this.objList[0];
         let vueObj = this;
         this.initMenu();  
+
         this.canvas.addEventListener("mousedown", function(event) {vueObj.mouseDown(event)});
+
         this.canvas.addEventListener("mousemove", function(event) {vueObj.mouseMove(event)});
-        window.addEventListener('keydown',function(e){
+
+        window.addEventListener('keydown',function(e) {
           vueObj.keyState[e.keyCode || e.which] = true;
         },true);    
-        window.addEventListener('keyup',function(e){
+
+        window.addEventListener('keypress', (e) => {
+          console.log(e.keyCode)
+          if (e.keyCode == 112) {
+            vueObj.gameState.pauseMod = !vueObj.gameState.pauseMod
+          }
+        },false)
+
+        window.addEventListener('keyup',function(e) {
           vueObj.keyState[e.keyCode || e.which] = false;
         },true);
           
